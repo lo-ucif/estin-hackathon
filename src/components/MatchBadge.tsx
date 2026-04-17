@@ -5,10 +5,10 @@ interface MatchBadgeProps {
 export const MatchBadge = ({ percent }: MatchBadgeProps) => {
   const tone =
     percent >= 90
-      ? "from-emerald-500 to-cyan-500"
+      ? "from-[#005ac2] to-[#00dce5]"
       : percent >= 80
-        ? "from-[#26a4ff] to-[#7c3aed]"
-        : "from-amber-500 to-orange-500";
+        ? "from-[#005ac2] to-[#6801d1]"
+        : "from-[#6801d1] to-[#8b5cf6]";
 
   return (
     <span

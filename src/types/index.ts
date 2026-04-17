@@ -15,6 +15,15 @@ export interface Job {
   description: string;
 }
 
+export interface Candidate {
+  id: string;
+  name: string;
+  title: string;
+  experience: ExperienceLevel;
+  skills: string[];
+  location: string;
+}
+
 export interface JobFilters {
   query: string;
   skills: string[];

@@ -1,4 +1,4 @@
-import type { Job } from "../types";
+import type { Candidate, Job } from "../types";
 
 export const jobs: Job[] = [
   {
@@ -72,4 +72,43 @@ export const allSkills = [
   "Python",
   "Docker",
   "Figma",
+  "Next.js",
+  "AWS",
+  "Communication",
+  "Leadership",
+];
+
+export const candidates: Candidate[] = [
+  {
+    id: "cand-1",
+    name: "Sara Benali",
+    title: "Frontend Developer",
+    experience: "Junior",
+    skills: ["React", "TypeScript", "Tailwind", "Figma"],
+    location: "Remote",
+  },
+  {
+    id: "cand-2",
+    name: "Yacine Haddad",
+    title: "Full-Stack Developer",
+    experience: "Mid",
+    skills: ["Node.js", "React", "SQL", "Docker"],
+    location: "Algiers",
+  },
+  {
+    id: "cand-3",
+    name: "Lina Boudiaf",
+    title: "Backend Engineer",
+    experience: "Senior",
+    skills: ["Node.js", "PostgreSQL", "AWS", "System Design"],
+    location: "Remote",
+  },
+  {
+    id: "cand-4",
+    name: "Amine Meziane",
+    title: "Data Analyst",
+    experience: "Mid",
+    skills: ["SQL", "Python", "Statistics", "Communication"],
+    location: "Oran",
+  },
 ];
