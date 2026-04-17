@@ -1,4 +1,4 @@
-import { Week } from '../../types/week';
+import type { Week } from '../../types/week';
 import { WeekCard } from '../WeekCard/WeekCard';
 
 interface WeekListProps {

@@ -1,4 +1,4 @@
-import { Activity } from '../types/activity';
+import type { Activity } from '../types/activity';
 
 export const activityData: Activity[] = [
   { id: '1', title: 'Completed Day 5 of Week 2', timestamp: '2 hours ago', type: 'completed' },

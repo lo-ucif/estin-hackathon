@@ -1,4 +1,4 @@
-import { Stats } from '../types/stats';
+import type { Stats } from '../types/stats';
 
 export const statsData: Stats[] = [
   { label: 'Total Days', value: 45, change: 12, trend: 'up' },

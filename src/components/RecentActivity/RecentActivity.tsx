@@ -1,4 +1,4 @@
-import { Activity } from '../../types/activity';
+import type { Activity } from '../../types/activity';
 
 interface RecentActivityProps {
   activities: Activity[];

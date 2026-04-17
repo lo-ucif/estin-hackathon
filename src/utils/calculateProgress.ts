@@ -1,4 +1,4 @@
-import { Week } from '../types/week';
+import type { Week } from '../types/week';
 
 export const calculateProgress = (weeks: Week[]): number => {
   if (weeks.length === 0) return 0;

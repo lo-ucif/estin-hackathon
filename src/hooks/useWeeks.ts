@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Week } from '../types/week';
+import type { Week } from '../types/week';
 import { weeksData } from '../data/weeksData';
 
 export const useWeeks = () => {
