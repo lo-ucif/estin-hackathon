@@ -32,7 +32,7 @@ export const Navbar = () => {
 
         <div className="flex items-center gap-3">
           <NavLink to="/jobs" className="hidden rounded-md bg-gradient-to-r from-[#005ac2] to-[#6801d1] px-5 py-2 text-sm font-bold text-white shadow-[0_12px_24px_rgba(0,90,194,0.25)] md:inline-flex">
-            Get Started
+            contact us
           </NavLink>
           <NavLink to="/upload" className="md:hidden rounded-md border border-[var(--ai-border)] px-3 py-2 text-sm text-[#1a1c1e]">
             Post
