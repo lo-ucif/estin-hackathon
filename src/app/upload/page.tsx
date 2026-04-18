@@ -12,19 +12,24 @@ const GlassCard = ({ children }: { children: React.ReactNode }) => (
 );
 
 export const UploadPage = () => {
-  const [jobTitle, setJobTitle] = useState("Frontend Developer");
-  const [company, setCompany] = useState("Startup DZ");
+  const [jobTitle, setJobTitle] = useState(
+    "Senior Frontend Engineer (React Specialist)",
+  );
+  const [company, setCompany] = useState("AI Tech Studio");
   const [jobDescription, setJobDescription] = useState(
-    "Looking for a frontend dev",
+    "We are looking for a senior frontend engineer with strong experience in React and GraphQL to build scalable web applications. The candidate should have deep knowledge in frontend architecture, API integration, and database interactions.",
   );
   const [experienceLevel, setExperienceLevel] =
-    useState<ExperienceLevel>("Junior");
+    useState<ExperienceLevel>("Senior");
   const [location, setLocation] = useState("Remote");
   const [workType, setWorkType] = useState<WorkType>("Remote");
   const [skills, setSkills] = useState<string[]>([
     "React",
-    "JavaScript",
-    "CSS",
+    "GraphQL",
+    "TypeScript",
+    "SQL",
+    "Redux",
+    "Frontend Architecture",
   ]);
   const [skillInput, setSkillInput] = useState("");
   const [pdfName, setPdfName] = useState("");

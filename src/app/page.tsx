@@ -217,20 +217,61 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section className="grid gap-5 md:grid-cols-3">
-        {testimonials.map((item) => (
-          <article key={item.name} className="bg-white px-6 py-5">
-            <div className="mb-3 h-12 w-12 rounded-full bg-gradient-to-r from-[#005ac2] to-[#6801d1]" />
-            <p className="text-sm font-semibold text-[#202430]/50">
-              {item.name}
-            </p>
-            <p className="text-sm text-[#202430]/50">{item.role}</p>
-            <p className="mt-4 text-[27px] leading-none text-[#4640de]">“</p>
-            <p className="mt-1 text-lg font-semibold leading-8 text-[#202430]">
-              {item.quote}
-            </p>
-          </article>
-        ))}
+      <section className="py-16">
+        <div className="max-w-[1280px] mx-auto px-4 md:px-6">
+          <div className="text-center mb-12">
+            <button className="bg-white border border-[#cccccc] rounded-full px-4 py-1.5 text-[#333333] text-sm font-medium">
+              Ready to get started
+            </button>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            {testimonials.map((item) => (
+              <div
+                key={item.name}
+                className="bg-white rounded-lg shadow-[0_1px_4px_rgba(0,0,0,0.08)] p-6 w-full h-[240px] relative"
+              >
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#5c4ec9] flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-xs">
+                    👤
+                  </div>
+                </div>
+                <div className="mt-12 text-center">
+                  <p className="text-[#888888] text-sm font-normal mt-11">
+                    {item.name}
+                  </p>
+                  <p className="text-[#aaaaaa] text-xs mt-1">{item.role}</p>
+                  <div className="mt-5 text-left">
+                    <span className="text-[#5b4fcf] text-2xl leading-none">
+                      "
+                    </span>
+                    <p className="text-[#1a1a2e] text-base font-bold leading-relaxed inline ml-1">
+                      {item.quote}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <footer className="bg-white border-t border-[#e5e5e5] h-14 flex justify-between items-center px-4 md:px-6 py-4 mt-16">
+            <div className="text-[#4f3fe6] text-sm font-semibold">
+              ai-power-job
+            </div>
+            <nav className="flex gap-6">
+              <a href="/" className="text-[#555555] text-sm">
+                Opportunities
+              </a>
+              <a href="#how" className="text-[#555555] text-sm">
+                How
+              </a>
+              <a href="#features" className="text-[#555555] text-sm">
+                features
+              </a>
+              <a href="#ready" className="text-[#555555] text-sm">
+                Ready to get started
+              </a>
+            </nav>
+          </footer>
+        </div>
       </section>
     </div>
   );

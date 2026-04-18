@@ -9,6 +9,7 @@ export interface WorkerPayload {
   seniority: "junior" | "mid" | "senior";
   cv: string;
   email: string;
+  pdfFile?: File;
 }
 
 export interface EmployerPayload {

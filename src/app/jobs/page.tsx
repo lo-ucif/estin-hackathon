@@ -19,14 +19,20 @@ const inputClass =
   "rounded-xl border border-[var(--ai-border)] bg-white px-4 py-3 text-sm outline-none focus:border-[#005ac2]";
 
 export const JobsPage = () => {
-  const [name, setName] = useState("Ahmed Test");
-  const [experienceYears, setExperienceYears] = useState(5);
-  const [location, setLocation] = useState("Remote");
+  const [name, setName] = useState("Ahmed Benali");
+  const [experienceYears, setExperienceYears] = useState(3);
+  const [location, setLocation] = useState("Setif, Algeria");
   const [seniority, setSeniority] = useState<ExperienceLevel>("Junior");
-  const [cv, setCv] = useState("Frontend developer with React experience");
-  const [email, setEmail] = useState("test@email.com");
+  const [email, setEmail] = useState("ahmed.benali@email.com");
   const [skillInput, setSkillInput] = useState("");
-  const [skills, setSkills] = useState<string[]>(["React", "Java", "SQL"]);
+  const [skills, setSkills] = useState<string[]>([
+    "React",
+    "TypeScript",
+    "Node.js",
+    "MongoDB",
+  ]);
+  const [pdfName, setPdfName] = useState("");
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   // API Integration
   const {
@@ -64,6 +70,10 @@ export const JobsPage = () => {
     }
 
     try {
+      const cv = pdfName
+        ? `Uploaded CV: ${pdfName}`
+        : `Name: ${name}\nEmail: ${email}\nSkills: ${skills.join(", ")}\nExperience: ${experienceYears} years\nSeniority: ${seniority}\nLocation: ${location}\nCV: https://example.com/cv/ahmed-benali.pdf`;
+
       const payload = {
         type: "worker" as const,
         name,
@@ -73,6 +83,7 @@ export const JobsPage = () => {
         seniority: seniority.toLowerCase() as "junior" | "mid" | "senior",
         cv,
         email,
+        ...(pdfFile && { pdfFile }),
       };
 
       const result = await submitWorkerProfile(payload);
@@ -124,39 +135,14 @@ export const JobsPage = () => {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Name"
+            placeholder="Name of person"
             className={inputClass}
           />
           <input
-            type="number"
-            value={experienceYears}
-            onChange={(e) => setExperienceYears(parseInt(e.target.value) || 0)}
-            placeholder="Experience Years"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
             className={inputClass}
-          />
-          <input
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Location"
-            className={inputClass}
-          />
-          <select
-            value={seniority}
-            onChange={(e) => setSeniority(e.target.value as ExperienceLevel)}
-            className={inputClass}
-          >
-            <option value="Junior">Junior</option>
-            <option value="Mid">Mid</option>
-            <option value="Senior">Senior</option>
-          </select>
-        </div>
-
-        <div className="mt-4">
-          <textarea
-            value={cv}
-            onChange={(e) => setCv(e.target.value)}
-            placeholder="CV Description"
-            className={`w-full min-h-[110px] ${inputClass}`}
           />
         </div>
 
@@ -197,13 +183,53 @@ export const JobsPage = () => {
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
           <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email Address"
+            type="number"
+            value={experienceYears}
+            onChange={(e) => setExperienceYears(parseInt(e.target.value) || 0)}
+            placeholder="Experience year"
             className={inputClass}
           />
+          <select
+            value={seniority}
+            onChange={(e) => setSeniority(e.target.value as ExperienceLevel)}
+            className={inputClass}
+          >
+            <option value="Junior">Junior</option>
+            <option value="Mid">Mid</option>
+            <option value="Senior">Senior</option>
+          </select>
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Location (Remote, Onsite, etc.)"
+            className={inputClass}
+          />
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-dashed border-[#005ac2]/35 bg-[#005ac2]/5 p-4">
+          <label className="cursor-pointer text-sm font-semibold text-[#005ac2]">
+            Upload CV (PDF)
+            <input
+              type="file"
+              accept=".pdf"
+              className="mt-2 block text-xs text-[#44474e]"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setPdfFile(file);
+                  setPdfName(file.name);
+                } else {
+                  setPdfFile(null);
+                  setPdfName("");
+                }
+              }}
+            />
+          </label>
+          {pdfName && (
+            <p className="mt-2 text-xs text-[#44474e]">Selected: {pdfName}</p>
+          )}
         </div>
 
         <button

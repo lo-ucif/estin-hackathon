@@ -26,10 +26,37 @@ export const submitWorkerProfile = async (
   payload: WorkerPayload,
 ): Promise<WorkerResponse> => {
   try {
-    const response = await apiClient.post<WorkerResponse>(
-      RECRUITMENT_ENDPOINT,
-      payload,
-    );
+    let response;
+
+    if (payload.pdfFile) {
+      // Use FormData for file uploads
+      const formData = new FormData();
+      formData.append("type", payload.type);
+      formData.append("name", payload.name);
+      formData.append("skills", JSON.stringify(payload.skills));
+      formData.append("location", payload.location);
+      formData.append("experience_years", payload.experience_years.toString());
+      formData.append("seniority", payload.seniority);
+      formData.append("cv", payload.cv);
+      formData.append("email", payload.email);
+      formData.append("pdfFile", payload.pdfFile);
+
+      response = await apiClient.post<WorkerResponse>(
+        RECRUITMENT_ENDPOINT,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+    } else {
+      // Use JSON for text-only submissions
+      response = await apiClient.post<WorkerResponse>(
+        RECRUITMENT_ENDPOINT,
+        payload,
+      );
+    }
 
     if (response.data.success) {
       return response.data;
