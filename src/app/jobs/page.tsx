@@ -1,12 +1,7 @@
 import { useState } from "react";
-import { JobCard } from "../../components/JobCard";
+import { ClickableJobCard } from "../../components/ClickableJobCard";
 import { jobs } from "../../data/jobs";
-import type {
-  CandidateGeneratedProfile,
-  ContactInfo,
-  ExperienceLevel,
-  WorkType,
-} from "../../types";
+import type { CandidateGeneratedProfile, ExperienceLevel } from "../../types";
 import { matchJobsForProfile } from "../../utils/matcher";
 import { saveGeneratedProfile } from "../../utils/profileStore";
 import { useSubmitWorkerProfile } from "../../hooks/useRecruitmentApi";
@@ -23,31 +18,15 @@ const GlassCard = ({ children }: { children: React.ReactNode }) => (
 const inputClass =
   "rounded-xl border border-[var(--ai-border)] bg-white px-4 py-3 text-sm outline-none focus:border-[#005ac2]";
 
-const iconChipClass =
-  "inline-flex items-center rounded-full border border-[#005ac2]/20 bg-[#005ac2]/8 px-3 py-1 text-xs font-semibold text-[#005ac2]";
-
 export const JobsPage = () => {
-  const [fullName, setFullName] = useState("Ahmed Test");
-  const [age, setAge] = useState("2");
+  const [name, setName] = useState("Ahmed Test");
+  const [experienceYears, setExperienceYears] = useState(5);
   const [location, setLocation] = useState("Remote");
-  const [workType, setWorkType] = useState<WorkType>("Remote");
-  const [experience, setExperience] = useState(
-    "Frontend developer with React experience",
-  );
-  const [education, setEducation] = useState("");
-  const [projects, setProjects] = useState("");
   const [seniority, setSeniority] = useState<ExperienceLevel>("Junior");
-  const [cvFileName, setCvFileName] = useState("");
+  const [cv, setCv] = useState("Frontend developer with React experience");
+  const [email, setEmail] = useState("test@email.com");
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>(["React", "Java", "SQL"]);
-
-  const [contact, setContact] = useState<ContactInfo>({
-    phone: "",
-    whatsapp: "",
-    email: "test@email.com",
-    linkedIn: "",
-    allowDirectContact: true,
-  });
 
   // API Integration
   const {
@@ -71,37 +50,29 @@ export const JobsPage = () => {
 
   const handleGenerateProfile = async () => {
     // Validation
-    if (!fullName.trim()) {
-      showToast("Please enter your full name", "error");
+    if (!name.trim()) {
+      showToast("Please enter your name", "error");
       return;
     }
     if (skills.length === 0) {
       showToast("Please add at least one skill", "error");
       return;
     }
-    if (!contact.email.trim()) {
+    if (!email.trim()) {
       showToast("Please enter your email address", "error");
       return;
     }
 
     try {
-      const cv =
-        `Name: ${fullName}\n` +
-        `Location: ${location || "Not specified"}\n` +
-        `Seniority: ${seniority}\n` +
-        `Experience: ${experience || "Not specified"}\n` +
-        `Education: ${education || "Not specified"}\n` +
-        `Projects: ${projects || "Not specified"}`;
-
       const payload = {
         type: "worker" as const,
-        name: fullName,
+        name,
         skills,
-        location: location || "Not specified",
-        experience_years: parseInt(age) || 0,
+        location,
+        experience_years: experienceYears,
         seniority: seniority.toLowerCase() as "junior" | "mid" | "senior",
         cv,
-        email: contact.email,
+        email,
       };
 
       const result = await submitWorkerProfile(payload);
@@ -110,17 +81,23 @@ export const JobsPage = () => {
       // Save to local storage for reference
       const profile: CandidateGeneratedProfile = {
         id: "generated-profile",
-        name: fullName,
-        age,
-        location: location || "Not specified",
-        workType,
-        seniority,
+        name,
+        age: experienceYears.toString(),
+        location,
+        workType: "Remote",
+        seniority: seniority as ExperienceLevel,
         skills,
-        experienceText: experience,
-        education,
-        projects,
-        summary: result.summary || `${fullName}'s professional profile`,
-        contact,
+        experienceText: cv,
+        education: "",
+        projects: "",
+        summary: result.summary || `${name}'s professional profile`,
+        contact: {
+          phone: "",
+          whatsapp: "",
+          email,
+          linkedIn: "",
+          allowDirectContact: true,
+        },
       };
       saveGeneratedProfile(profile);
     } catch (err) {
@@ -145,15 +122,16 @@ export const JobsPage = () => {
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <input
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
             className={inputClass}
           />
           <input
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            placeholder="Age"
+            type="number"
+            value={experienceYears}
+            onChange={(e) => setExperienceYears(parseInt(e.target.value) || 0)}
+            placeholder="Experience Years"
             className={inputClass}
           />
           <input
@@ -163,15 +141,23 @@ export const JobsPage = () => {
             className={inputClass}
           />
           <select
-            value={workType}
-            onChange={(e) => setWorkType(e.target.value as WorkType)}
+            value={seniority}
+            onChange={(e) => setSeniority(e.target.value as ExperienceLevel)}
             className={inputClass}
           >
-            <option value="Local">Local</option>
-            <option value="Remote">Remote</option>
-            <option value="Hybrid">Hybrid</option>
-            <option value="Onsite">Onsite</option>
+            <option value="Junior">Junior</option>
+            <option value="Mid">Mid</option>
+            <option value="Senior">Senior</option>
           </select>
+        </div>
+
+        <div className="mt-4">
+          <textarea
+            value={cv}
+            onChange={(e) => setCv(e.target.value)}
+            placeholder="CV Description"
+            className={`w-full min-h-[110px] ${inputClass}`}
+          />
         </div>
 
         <div className="mt-4 rounded-2xl border border-[var(--ai-border)] bg-white p-4">
@@ -211,132 +197,13 @@ export const JobsPage = () => {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <textarea
-            value={experience}
-            onChange={(e) => setExperience(e.target.value)}
-            placeholder="Experience"
-            className={`min-h-[110px] ${inputClass}`}
-          />
-          <textarea
-            value={education}
-            onChange={(e) => setEducation(e.target.value)}
-            placeholder="Education"
-            className={`min-h-[110px] ${inputClass}`}
-          />
-          <textarea
-            value={projects}
-            onChange={(e) => setProjects(e.target.value)}
-            placeholder="Projects"
-            className={`min-h-[110px] ${inputClass}`}
-          />
-          <select
-            value={seniority}
-            onChange={(e) => setSeniority(e.target.value as ExperienceLevel)}
+        <div className="mt-4">
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email Address"
             className={inputClass}
-          >
-            <option value="Junior">Junior</option>
-            <option value="Mid">Mid</option>
-            <option value="Senior">Senior</option>
-          </select>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-dashed border-[#005ac2]/35 bg-[#005ac2]/5 p-4">
-          <label className="cursor-pointer text-sm font-semibold text-[#005ac2]">
-            Upload CV (optional PDF)
-            <input
-              type="file"
-              accept=".pdf"
-              className="mt-2 block text-xs text-[#44474e]"
-              onChange={(e) => setCvFileName(e.target.files?.[0]?.name ?? "")}
-            />
-          </label>
-          {cvFileName ? (
-            <p className="mt-2 text-xs text-[#44474e]">
-              Selected: {cvFileName}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-[var(--ai-border)] bg-white p-4">
-          <h2 className="ai-heading text-lg font-bold text-[#1a1c1e]">
-            Contact Information
-          </h2>
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
-            <input
-              value={contact.phone}
-              onChange={(e) =>
-                setContact((c) => ({ ...c, phone: e.target.value }))
-              }
-              placeholder="Phone Number"
-              className={inputClass}
-            />
-            <input
-              value={contact.whatsapp ?? ""}
-              onChange={(e) =>
-                setContact((c) => ({ ...c, whatsapp: e.target.value }))
-              }
-              placeholder="WhatsApp Number (optional)"
-              className={inputClass}
-            />
-            <input
-              value={contact.email}
-              onChange={(e) =>
-                setContact((c) => ({ ...c, email: e.target.value }))
-              }
-              placeholder="Email Address"
-              className={inputClass}
-            />
-            <input
-              value={contact.linkedIn ?? ""}
-              onChange={(e) =>
-                setContact((c) => ({ ...c, linkedIn: e.target.value }))
-              }
-              placeholder="LinkedIn Profile (optional)"
-              className={inputClass}
-            />
-          </div>
-
-          <div className="mt-4 flex items-center justify-between rounded-xl border border-[var(--ai-border)] bg-[#f8f8fd] px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-[#1a1c1e]">
-                Allow employers to contact me directly
-              </p>
-              <p className="text-xs text-[#44474e]">
-                {contact.allowDirectContact
-                  ? "ON: contact visible in profile"
-                  : "OFF: privacy mode enabled"}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                setContact((c) => ({
-                  ...c,
-                  allowDirectContact: !c.allowDirectContact,
-                }))
-              }
-              className={`relative h-8 w-14 rounded-full transition ${
-                contact.allowDirectContact
-                  ? "bg-gradient-to-r from-[#005ac2] to-[#6801d1]"
-                  : "bg-slate-300"
-              }`}
-              aria-label="Toggle direct contact"
-            >
-              <span
-                className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
-                  contact.allowDirectContact ? "left-7" : "left-1"
-                }`}
-              />
-            </button>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <span className={iconChipClass}>📞 Phone</span>
-            <span className={iconChipClass}>💬 WhatsApp</span>
-            <span className={iconChipClass}>📧 Email</span>
-            <span className={iconChipClass}>🔗 LinkedIn</span>
-          </div>
+          />
         </div>
 
         <button
@@ -382,25 +249,22 @@ export const JobsPage = () => {
               Recommended Jobs
             </h2>
             <p className="mt-1 text-sm text-[#44474e]">
-              Based on your profile and skills
+              Based on your profile and skills. Click any job to view full
+              details.
             </p>
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
               {matchJobsForProfile(skills, jobs, seniority)
                 .slice(0, 3)
                 .map((result) => (
-                  <JobCard
+                  <ClickableJobCard
                     key={result.job.id}
-                    jobId={result.job.id}
-                    title={result.job.title}
+                    job={result.job}
                     match={result.match}
                     matchedSkills={
                       result.matchedSkills.length > 0
                         ? result.matchedSkills
                         : result.job.skills.slice(0, 3)
                     }
-                    description={`Skills match: ${result.matchedSkills.length > 0 ? result.matchedSkills.join(", ") : "Partial match based on profile context"}`}
-                    actionLabel="View Job"
-                    actionTo={`/jobs/${result.job.id}`}
                     analyzing={false}
                   />
                 ))}
