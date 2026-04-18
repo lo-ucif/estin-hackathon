@@ -44,22 +44,29 @@ const CandidateCard = ({ candidate, onSelect }: CandidateCardProps) => {
           <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
             {candidate.reasoning}
           </p>
-          <div className="pt-1 flex items-center gap-2">
-            <span className="inline-block rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 capitalize">
+          <div className="pt-2 flex flex-wrap items-center gap-2">
+            <span className="inline-block rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 capitalize border border-slate-200">
               {candidate.recommendation.replace(/_/g, " ")}
             </span>
-            <span className="text-xs text-slate-500">
-              Click to view details
-            </span>
+            {candidate.experience !== undefined && (
+              <span className="inline-block rounded-full bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 border border-slate-200">
+                {candidate.experience}y exp
+              </span>
+            )}
+            {candidate.candidate_email && (
+              <span className="inline-block rounded-full bg-slate-50 px-2 py-1 text-xs font-medium text-slate-600 border border-slate-200">
+                {candidate.candidate_email}
+              </span>
+            )}
           </div>
         </div>
 
         {/* Match Score Badge */}
         <div
-          className={`flex flex-shrink-0 flex-col items-center justify-center rounded-lg ${scoreColor} px-3 py-2`}
+          className={`flex flex-shrink-0 flex-col items-center justify-center rounded-lg ${scoreColor} px-3 py-2 border ${scoreColor.replace('bg-', 'border-').replace('100', '200')} transition-colors`}
         >
           <span className="text-2xl font-bold">{candidate.match_score}%</span>
-          <span className="text-xs font-medium">Match</span>
+          <span className="text-[10px] uppercase font-bold tracking-wider mt-0.5">Match</span>
         </div>
       </div>
     </button>
@@ -100,11 +107,16 @@ const CandidateDetailModal = ({
                 <h2 className="text-3xl font-bold text-slate-900">
                   {candidate.candidate_name}
                 </h2>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
+                {candidate.candidate_email && (
+                  <p className="text-sm font-medium text-slate-500 mt-1">
+                    {candidate.candidate_email} {candidate.seniority ? ` • ${candidate.seniority} Level` : ""}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700">
                     #{candidate.rank}
                   </span>
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600 capitalize">
+                  <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-bold tracking-wide text-slate-600 capitalize uppercase">
                     {candidate.recommendation.replace(/_/g, " ")}
                   </span>
                 </div>
@@ -130,6 +142,29 @@ const CandidateDetailModal = ({
               {candidate.reasoning}
             </p>
           </div>
+
+          {/* Skills */}
+          {candidate.skills && candidate.skills.length > 0 && (
+             <div className="space-y-3">
+               <h3 className="text-lg font-semibold text-slate-900">Candidate Skills</h3>
+               <div className="flex flex-wrap gap-2">
+                 {candidate.skills.map((skill, idx) => (
+                   <span key={idx} className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700 capitalize">
+                     {skill}
+                   </span>
+                 ))}
+               </div>
+             </div>
+          )}
+
+          {/* Candidate Experience Note */}
+          {candidate.experience !== undefined && (
+            <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-4">
+              <p className="text-sm font-medium text-indigo-900">
+                Experience Level: {candidate.experience} years ({candidate.seniority} level)
+              </p>
+            </div>
+          )}
 
           {/* Match Quality Indicator */}
           <div className="space-y-3">
@@ -222,16 +257,47 @@ export const EmployerResult = ({ result }: EmployerResultProps) => {
     <>
       <div className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6">
         {/* Summary Section */}
-        {result.total_matches > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-slate-900">
-              Candidate Matches
-            </h3>
-            <p className="text-sm text-slate-600">
-              Found {result.total_matches} potential candidate
-              {result.total_matches !== 1 ? "s" : ""} for this position. Click
-              on any candidate to view details.
-            </p>
+        {result.total_matches !== undefined && result.total_matches > 0 && (
+          <div className="space-y-4 pb-2">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">
+                Candidate Matches
+              </h3>
+              <p className="text-sm text-slate-600 mt-1">
+                Found {result.total_matches} potential candidate
+                {result.total_matches !== 1 ? "s" : ""} for this position. Click
+                on any candidate to view details.
+              </p>
+            </div>
+            
+            {result.summary && (
+              <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                {result.summary.excellent ? (
+                  <span className="flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-green-700 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                    {result.summary.excellent} Excellent
+                  </span>
+                ) : null}
+                {result.summary.good ? (
+                  <span className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-700 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-blue-500"></span>
+                    {result.summary.good} Good
+                  </span>
+                ) : null}
+                {result.summary.fair ? (
+                  <span className="flex items-center gap-1.5 rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1.5 text-yellow-700 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-yellow-500"></span>
+                    {result.summary.fair} Fair
+                  </span>
+                ) : null}
+                {result.summary.low ? (
+                  <span className="flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-red-700 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-red-500"></span>
+                    {result.summary.low} Low
+                  </span>
+                ) : null}
+              </div>
+            )}
           </div>
         )}
 

@@ -32,7 +32,7 @@ export const UploadPage = () => {
     "Frontend Architecture",
   ]);
   const [skillInput, setSkillInput] = useState("");
-  const [pdfName, setPdfName] = useState("");
+
 
   // API Integration
   const {
@@ -200,20 +200,7 @@ export const UploadPage = () => {
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-dashed border-[#005ac2]/35 bg-[#005ac2]/5 p-4">
-          <label className="cursor-pointer text-sm font-semibold text-[#005ac2]">
-            Upload PDF (optional)
-            <input
-              type="file"
-              accept=".pdf"
-              className="mt-2 block text-xs text-[#44474e]"
-              onChange={(e) => setPdfName(e.target.files?.[0]?.name ?? "")}
-            />
-          </label>
-          {pdfName ? (
-            <p className="mt-2 text-xs text-[#44474e]">Selected: {pdfName}</p>
-          ) : null}
-        </div>
+
 
         <button
           type="button"
@@ -232,12 +219,17 @@ export const UploadPage = () => {
 
       {/* Loading State */}
       {loading && (
-        <GlassCard>
-          <LoadingSpinner
-            message="Processing job and finding candidates..."
-            size="md"
-          />
-        </GlassCard>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-3xl bg-white p-10 shadow-2xl border border-slate-100 min-w-[320px] animate-in fade-in zoom-in duration-300">
+            <LoadingSpinner message="" size="lg" />
+            <div className="text-center mt-2 space-y-2">
+              <h3 className="text-xl font-bold text-slate-900">Finding Candidates...</h3>
+              <p className="text-sm text-slate-500 max-w-[250px]">
+                Please wait while our AI searches and evaluates the best candidates for this position.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Error State */}

@@ -31,8 +31,7 @@ export const JobsPage = () => {
     "Node.js",
     "MongoDB",
   ]);
-  const [pdfName, setPdfName] = useState("");
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [cvInputText, setCvInputText] = useState("");
 
   // API Integration
   const {
@@ -70,9 +69,9 @@ export const JobsPage = () => {
     }
 
     try {
-      const cv = pdfName
-        ? `Uploaded CV: ${pdfName}`
-        : `Name: ${name}\nEmail: ${email}\nSkills: ${skills.join(", ")}\nExperience: ${experienceYears} years\nSeniority: ${seniority}\nLocation: ${location}\nCV: https://example.com/cv/ahmed-benali.pdf`;
+      const cv = cvInputText.trim()
+        ? cvInputText
+        : `Name: ${name}\nEmail: ${email}\nSkills: ${skills.join(", ")}\nExperience: ${experienceYears} years\nSeniority: ${seniority}\nLocation: ${location}`;
 
       const payload = {
         type: "worker" as const,
@@ -83,7 +82,6 @@ export const JobsPage = () => {
         seniority: seniority.toLowerCase() as "junior" | "mid" | "senior",
         cv,
         email,
-        ...(pdfFile && { pdfFile }),
       };
 
       const result = await submitWorkerProfile(payload);
@@ -208,28 +206,13 @@ export const JobsPage = () => {
           />
         </div>
 
-        <div className="mt-4 rounded-2xl border border-dashed border-[#005ac2]/35 bg-[#005ac2]/5 p-4">
-          <label className="cursor-pointer text-sm font-semibold text-[#005ac2]">
-            Upload CV (PDF)
-            <input
-              type="file"
-              accept=".pdf"
-              className="mt-2 block text-xs text-[#44474e]"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setPdfFile(file);
-                  setPdfName(file.name);
-                } else {
-                  setPdfFile(null);
-                  setPdfName("");
-                }
-              }}
-            />
-          </label>
-          {pdfName && (
-            <p className="mt-2 text-xs text-[#44474e]">Selected: {pdfName}</p>
-          )}
+        <div className="mt-4">
+          <textarea
+            value={cvInputText}
+            onChange={(e) => setCvInputText(e.target.value)}
+            placeholder="Paste your CV text here (optional)"
+            className={`${inputClass} w-full min-h-[120px] resize-y`}
+          />
         </div>
 
         <button
@@ -249,9 +232,17 @@ export const JobsPage = () => {
 
       {/* Loading State */}
       {loading && (
-        <GlassCard>
-          <LoadingSpinner message="Analyzing profile..." size="md" />
-        </GlassCard>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center gap-4 rounded-3xl bg-white p-10 shadow-2xl border border-slate-100 min-w-[320px] animate-in fade-in zoom-in duration-300">
+            <LoadingSpinner message="" size="lg" />
+            <div className="text-center mt-2 space-y-2">
+              <h3 className="text-xl font-bold text-slate-900">Analyzing Profile...</h3>
+              <p className="text-sm text-slate-500 max-w-[250px]">
+                Please wait while our AI finds the best opportunities for your skills.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Error State */}

@@ -9,7 +9,6 @@ export interface WorkerPayload {
   seniority: "junior" | "mid" | "senior";
   cv: string;
   email: string;
-  pdfFile?: File;
 }
 
 export interface EmployerPayload {
@@ -27,11 +26,16 @@ export interface WorkerJobMatch {
   job_title: string;
   job_company: string;
   job_location: string;
-  job_url: string;
+  job_url?: string;
   match_score: number;
   match_tier: string;
   matching_skills: string[];
   rank: number;
+  reasoning?: string;
+  strengths?: string[];
+  gaps?: string[];
+  recommendation?: string;
+  pre_score?: number;
 }
 
 export interface WorkerProfile {
@@ -52,21 +56,44 @@ export interface WorkerResponse {
   skills_highlight?: string[];
   recommended_roles?: string[];
   error?: string;
+  generated_at?: string;
 }
 
 export interface CandidateMatch {
   rank: number;
   candidate_name: string;
+  candidate_email?: string;
+  skills?: string[];
+  experience?: number;
+  seniority?: string;
   match_score: number;
-  recommendation: "strong_match" | "good_match" | "moderate_match";
+  match_tier?: string;
+  matching_skills?: string[];
+  recommendation: string;
   reasoning: string;
+  ai_signal?: string;
+}
+
+export interface MatchSummary {
+  excellent?: number;
+  good?: number;
+  fair?: number;
+  low?: number;
+}
+
+export interface AiRecommendation {
+  best_candidate?: CandidateMatch;
+  hiring_priority?: string;
 }
 
 export interface EmployerResponse {
   success: boolean;
-  type: "employer";
-  total_matches: number;
+  type?: string;
+  total_matches?: number;
+  summary?: MatchSummary;
+  ai_recommendation?: AiRecommendation;
   matches: CandidateMatch[];
+  top_candidates?: CandidateMatch[];
   error?: string;
 }
 

@@ -7,7 +7,7 @@ import type {
 } from "../types/api";
 
 const API_BASE_URL = "https://videoedit.app.n8n.cloud";
-const RECRUITMENT_ENDPOINT = "/webhook/3b9abe6d-f3ac-4ce7-a731-c58d5d8d159d";
+const RECRUITMENT_ENDPOINT = "/webhook/recruitment";
 
 // Create axios instance with base config
 const apiClient = axios.create({
@@ -26,37 +26,10 @@ export const submitWorkerProfile = async (
   payload: WorkerPayload,
 ): Promise<WorkerResponse> => {
   try {
-    let response;
-
-    if (payload.pdfFile) {
-      // Use FormData for file uploads
-      const formData = new FormData();
-      formData.append("type", payload.type);
-      formData.append("name", payload.name);
-      formData.append("skills", JSON.stringify(payload.skills));
-      formData.append("location", payload.location);
-      formData.append("experience_years", payload.experience_years.toString());
-      formData.append("seniority", payload.seniority);
-      formData.append("cv", payload.cv);
-      formData.append("email", payload.email);
-      formData.append("pdfFile", payload.pdfFile);
-
-      response = await apiClient.post<WorkerResponse>(
-        RECRUITMENT_ENDPOINT,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
-    } else {
-      // Use JSON for text-only submissions
-      response = await apiClient.post<WorkerResponse>(
-        RECRUITMENT_ENDPOINT,
-        payload,
-      );
-    }
+    const response = await apiClient.post<WorkerResponse>(
+      RECRUITMENT_ENDPOINT,
+      payload,
+    );
 
     if (response.data.success) {
       return response.data;
@@ -88,7 +61,7 @@ export const submitEmployerJob = async (
 ): Promise<EmployerResponse> => {
   try {
     const response = await apiClient.post<EmployerResponse>(
-      `${RECRUITMENT_ENDPOINT}?employer=true`,
+      "/webhook/recruitment?employer=true",
       payload,
     );
 
@@ -109,3 +82,5 @@ export const submitEmployerJob = async (
     throw new Error(errorMessage);
   }
 };
+
+
