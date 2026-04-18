@@ -7,7 +7,7 @@ import type {
 } from "../types/api";
 
 const API_BASE_URL = "https://videoedit.app.n8n.cloud";
-const RECRUITMENT_ENDPOINT = "/webhook/recruitment";
+const RECRUITMENT_ENDPOINT = "/webhook/3b9abe6d-f3ac-4ce7-a731-c58d5d8d159d";
 
 // Create axios instance with base config
 const apiClient = axios.create({

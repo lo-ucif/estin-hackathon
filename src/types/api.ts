@@ -23,9 +23,31 @@ export interface EmployerPayload {
 
 // ============== API RESPONSES ==============
 
+export interface WorkerJobMatch {
+  job_title: string;
+  job_company: string;
+  job_location: string;
+  job_url: string;
+  match_score: number;
+  match_tier: string;
+  matching_skills: string[];
+  rank: number;
+}
+
+export interface WorkerProfile {
+  name: string;
+  skills: string[];
+  seniority: string;
+  profile_summary: string;
+}
+
 export interface WorkerResponse {
   success: boolean;
-  message: string;
+  type?: string;
+  total_matches?: number;
+  matches?: WorkerJobMatch[];
+  worker_profile?: WorkerProfile;
+  message?: string;
   summary?: string;
   skills_highlight?: string[];
   recommended_roles?: string[];

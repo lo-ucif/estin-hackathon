@@ -9,13 +9,11 @@ You can test the API endpoints directly using curl, Postman, or the browser cons
 ## Worker Profile Submission
 
 ### Endpoint
-
 ```
 POST https://videoedit.app.n8n.cloud/webhook/recruitment
 ```
 
 ### Request Example
-
 ```json
 {
   "type": "worker",
@@ -30,7 +28,6 @@ POST https://videoedit.app.n8n.cloud/webhook/recruitment
 ```
 
 ### Expected Response
-
 ```json
 {
   "success": true,
@@ -46,7 +43,6 @@ POST https://videoedit.app.n8n.cloud/webhook/recruitment
 ```
 
 ### cURL Test
-
 ```bash
 curl -X POST https://videoedit.app.n8n.cloud/webhook/recruitment \
   -H "Content-Type: application/json" \
@@ -63,25 +59,24 @@ curl -X POST https://videoedit.app.n8n.cloud/webhook/recruitment \
 ```
 
 ### JavaScript/Fetch Test
-
 ```javascript
 // Open browser console and run:
-fetch("https://videoedit.app.n8n.cloud/webhook/recruitment", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
+fetch('https://videoedit.app.n8n.cloud/webhook/recruitment', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    type: "worker",
-    name: "Jane Smith",
-    skills: ["React", "Node.js", "TypeScript"],
-    location: "New York",
+    type: 'worker',
+    name: 'Jane Smith',
+    skills: ['React', 'Node.js', 'TypeScript'],
+    location: 'New York',
     experience_years: 5,
-    seniority: "senior",
-    cv: "Full stack engineer with 5 years experience",
-    email: "jane@example.com",
-  }),
+    seniority: 'senior',
+    cv: 'Full stack engineer with 5 years experience',
+    email: 'jane@example.com'
+  })
 })
-  .then((r) => r.json())
-  .then((data) => console.log(data));
+.then(r => r.json())
+.then(data => console.log(data))
 ```
 
 ---
@@ -89,13 +84,11 @@ fetch("https://videoedit.app.n8n.cloud/webhook/recruitment", {
 ## Employer Job Posting
 
 ### Endpoint
-
 ```
 POST https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true
 ```
 
 ### Request Example
-
 ```json
 {
   "type": "employer",
@@ -108,7 +101,6 @@ POST https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true
 ```
 
 ### Expected Response
-
 ```json
 {
   "success": true,
@@ -148,7 +140,6 @@ POST https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true
 ```
 
 ### cURL Test
-
 ```bash
 curl -X POST "https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true" \
   -H "Content-Type: application/json" \
@@ -163,23 +154,22 @@ curl -X POST "https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true"
 ```
 
 ### JavaScript/Fetch Test
-
 ```javascript
 // Open browser console and run:
-fetch("https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
+fetch('https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    type: "employer",
-    title: "Full Stack Engineer",
-    company: "StartupXYZ",
-    skills_required: ["React", "Node.js", "MongoDB"],
-    location: "Austin",
-    description: "Seeking full stack engineer for startup",
-  }),
+    type: 'employer',
+    title: 'Full Stack Engineer',
+    company: 'StartupXYZ',
+    skills_required: ['React', 'Node.js', 'MongoDB'],
+    location: 'Austin',
+    description: 'Seeking full stack engineer for startup'
+  })
 })
-  .then((r) => r.json())
-  .then((data) => console.log(data));
+.then(r => r.json())
+.then(data => console.log(data))
 ```
 
 ---
@@ -198,7 +188,6 @@ fetch("https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true", {
 ### Testing in the UI
 
 1. **Worker Flow (`/jobs` page)**
-
    ```
    - Enter name: "Jane Developer"
    - Add skills: React, TypeScript, Node.js
@@ -224,57 +213,52 @@ fetch("https://videoedit.app.n8n.cloud/webhook/recruitment?employer=true", {
 ## Response Payload Fields Reference
 
 ### WorkerPayload (Request)
-
-| Field            | Type     | Required | Description                  |
-| ---------------- | -------- | -------- | ---------------------------- |
-| type             | string   | ✓        | Must be "worker"             |
-| name             | string   | ✓        | Candidate's full name        |
-| skills           | string[] | ✓        | Array of skill names         |
-| location         | string   | ✓        | Location or "Not specified"  |
-| experience_years | number   | ✓        | Years of experience          |
-| seniority        | enum     | ✓        | "junior", "mid", or "senior" |
-| cv               | string   | ✓        | CV text or summary           |
-| email            | string   | ✓        | Contact email                |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| type | string | ✓ | Must be "worker" |
+| name | string | ✓ | Candidate's full name |
+| skills | string[] | ✓ | Array of skill names |
+| location | string | ✓ | Location or "Not specified" |
+| experience_years | number | ✓ | Years of experience |
+| seniority | enum | ✓ | "junior", "mid", or "senior" |
+| cv | string | ✓ | CV text or summary |
+| email | string | ✓ | Contact email |
 
 ### WorkerResponse (Response)
-
-| Field             | Type     | Description                    |
-| ----------------- | -------- | ------------------------------ |
-| success           | boolean  | Whether request was successful |
-| message           | string   | Confirmation message           |
-| summary           | string   | AI-generated profile summary   |
-| skills_highlight  | string[] | Key skills extracted by AI     |
-| recommended_roles | string[] | Job roles recommended by AI    |
+| Field | Type | Description |
+|-------|------|-------------|
+| success | boolean | Whether request was successful |
+| message | string | Confirmation message |
+| summary | string | AI-generated profile summary |
+| skills_highlight | string[] | Key skills extracted by AI |
+| recommended_roles | string[] | Job roles recommended by AI |
 
 ### EmployerPayload (Request)
-
-| Field           | Type     | Required | Description        |
-| --------------- | -------- | -------- | ------------------ |
-| type            | string   | ✓        | Must be "employer" |
-| title           | string   | ✓        | Job title          |
-| company         | string   | ✓        | Company name       |
-| skills_required | string[] | ✓        | Required skills    |
-| location        | string   | ✓        | Job location       |
-| description     | string   | ✓        | Job description    |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| type | string | ✓ | Must be "employer" |
+| title | string | ✓ | Job title |
+| company | string | ✓ | Company name |
+| skills_required | string[] | ✓ | Required skills |
+| location | string | ✓ | Job location |
+| description | string | ✓ | Job description |
 
 ### EmployerResponse (Response)
-
-| Field         | Type             | Description                    |
-| ------------- | ---------------- | ------------------------------ |
-| success       | boolean          | Whether request was successful |
-| type          | string           | "employer"                     |
-| total_matches | number           | Total candidates found         |
-| matches       | CandidateMatch[] | List of matched candidates     |
+| Field | Type | Description |
+|-------|------|-------------|
+| success | boolean | Whether request was successful |
+| type | string | "employer" |
+| total_matches | number | Total candidates found |
+| matches | CandidateMatch[] | List of matched candidates |
 
 ### CandidateMatch (in matches array)
-
-| Field          | Type   | Description                                    |
-| -------------- | ------ | ---------------------------------------------- |
-| rank           | number | 1-indexed ranking                              |
-| candidate_name | string | Candidate's name                               |
-| match_score    | number | 0-100 match percentage                         |
+| Field | Type | Description |
+|-------|------|-------------|
+| rank | number | 1-indexed ranking |
+| candidate_name | string | Candidate's name |
+| match_score | number | 0-100 match percentage |
 | recommendation | string | "strong_match", "good_match", "moderate_match" |
-| reasoning      | string | Why candidate matches this job                 |
+| reasoning | string | Why candidate matches this job |
 
 ---
 
@@ -291,7 +275,6 @@ If the API returns an error:
 ```
 
 Or HTTP error codes:
-
 - `400` - Bad request (missing/invalid fields)
 - `500` - Server error
 - `429` - Rate limit exceeded

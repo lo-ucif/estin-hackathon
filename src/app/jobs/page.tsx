@@ -269,7 +269,7 @@ export const JobsPage = () => {
         <>
           <WorkerResult result={apiResponse} />
 
-          {/* Matching Jobs from Mock Data */}
+          {/* Recommended Jobs */}
           <GlassCard>
             <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
               Recommended Jobs
@@ -279,21 +279,54 @@ export const JobsPage = () => {
               details.
             </p>
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
-              {matchJobsForProfile(skills, jobs, seniority)
-                .slice(0, 3)
-                .map((result) => (
-                  <ClickableJobCard
-                    key={result.job.id}
-                    job={result.job}
-                    match={result.match}
-                    matchedSkills={
-                      result.matchedSkills.length > 0
-                        ? result.matchedSkills
-                        : result.job.skills.slice(0, 3)
-                    }
-                    analyzing={false}
-                  />
-                ))}
+              {apiResponse.matches && apiResponse.matches.length > 0 ? (
+                // Use API Matches
+                apiResponse.matches.map((matchData, index) => {
+                  const mappedJob = {
+                    id: `api-job-${index}`,
+                    title: matchData.job_title || "Untitled Job",
+                    company: matchData.job_company || "Unknown Company",
+                    location: matchData.job_location || "Remote",
+                    workType: matchData.job_location?.toLowerCase().includes("remote") ? "Remote" : "Onsite",
+                    experience: "Mid" as ExperienceLevel,
+                    salaryRange: "0-120k" as const,
+                    salaryLabel: "Competitive Salary",
+                    match: matchData.match_score || 0,
+                    skills: matchData.matching_skills || [],
+                    description: `This job is a ${matchData.match_tier || "good"} match for your profile based on your skills and experience! You can view the full details by clicking below.`,
+                    employerContact: {
+                      email: matchData.job_url || "admin@example.com",
+                    },
+                  };
+
+                  return (
+                    <ClickableJobCard
+                      key={mappedJob.id}
+                      job={mappedJob as any}
+                      match={matchData.match_score || 0}
+                      matchedSkills={matchData.matching_skills || []}
+                      analyzing={false}
+                    />
+                  );
+                })
+              ) : (
+                // Fallback to Mock Data if API didn't return matches
+                matchJobsForProfile(skills, jobs, seniority)
+                  .slice(0, 3)
+                  .map((result) => (
+                    <ClickableJobCard
+                      key={result.job.id}
+                      job={result.job}
+                      match={result.match}
+                      matchedSkills={
+                        result.matchedSkills.length > 0
+                          ? result.matchedSkills
+                          : result.job.skills.slice(0, 3)
+                      }
+                      analyzing={false}
+                    />
+                  ))
+              )}
             </div>
           </GlassCard>
         </>
