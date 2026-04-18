@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { JobCard } from "../../components/JobCard";
 import { jobs } from "../../data/jobs";
 import type {
@@ -9,6 +9,10 @@ import type {
 } from "../../types";
 import { matchJobsForProfile } from "../../utils/matcher";
 import { saveGeneratedProfile } from "../../utils/profileStore";
+import { useSubmitWorkerProfile } from "../../hooks/useRecruitmentApi";
+import { WorkerResult } from "../../components/WorkerResult";
+import { Toast, useToast } from "../../components/Toast";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 
 const GlassCard = ({ children }: { children: React.ReactNode }) => (
   <section className="rounded-[30px] border border-[rgba(196,198,208,0.4)] bg-[rgba(255,255,255,0.72)] p-6 shadow-[0_14px_36px_rgba(0,0,0,0.06)] backdrop-blur-[10px] md:p-8">
@@ -23,28 +27,36 @@ const iconChipClass =
   "inline-flex items-center rounded-full border border-[#005ac2]/20 bg-[#005ac2]/8 px-3 py-1 text-xs font-semibold text-[#005ac2]";
 
 export const JobsPage = () => {
-  const [fullName, setFullName] = useState("");
-  const [age, setAge] = useState("");
-  const [location, setLocation] = useState("");
+  const [fullName, setFullName] = useState("Ahmed Test");
+  const [age, setAge] = useState("2");
+  const [location, setLocation] = useState("Remote");
   const [workType, setWorkType] = useState<WorkType>("Remote");
-  const [experience, setExperience] = useState("");
+  const [experience, setExperience] = useState(
+    "Frontend developer with React experience",
+  );
   const [education, setEducation] = useState("");
   const [projects, setProjects] = useState("");
   const [seniority, setSeniority] = useState<ExperienceLevel>("Junior");
   const [cvFileName, setCvFileName] = useState("");
   const [skillInput, setSkillInput] = useState("");
-  const [skills, setSkills] = useState<string[]>(["React", "TypeScript"]);
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [completed, setCompleted] = useState(false);
+  const [skills, setSkills] = useState<string[]>(["React", "Java", "SQL"]);
 
   const [contact, setContact] = useState<ContactInfo>({
     phone: "",
     whatsapp: "",
-    email: "",
+    email: "test@email.com",
     linkedIn: "",
     allowDirectContact: true,
   });
+
+  // API Integration
+  const {
+    submit: submitWorkerProfile,
+    loading,
+    error,
+    data: apiResponse,
+  } = useSubmitWorkerProfile();
+  const { toast, showToast, hideToast } = useToast();
 
   const addSkill = () => {
     const value = skillInput.trim();
@@ -57,52 +69,65 @@ export const JobsPage = () => {
     setSkills((current) => current.filter((item) => item !== skill));
   };
 
-  const profileSummary = useMemo(() => {
-    const safeName = fullName || "Candidate";
-    const primarySkills =
-      skills.slice(0, 4).join(", ") || "General tech skills";
-    return `${safeName} is a ${seniority.toLowerCase()} candidate in ${location || "their region"}, interested in ${workType.toLowerCase()} roles. Core strengths include ${primarySkills}. Experience highlights: ${experience || "practical project delivery and teamwork"}.`;
-  }, [fullName, seniority, location, workType, skills, experience]);
+  const handleGenerateProfile = async () => {
+    // Validation
+    if (!fullName.trim()) {
+      showToast("Please enter your full name", "error");
+      return;
+    }
+    if (skills.length === 0) {
+      showToast("Please add at least one skill", "error");
+      return;
+    }
+    if (!contact.email.trim()) {
+      showToast("Please enter your email address", "error");
+      return;
+    }
 
-  const matchedJobs = useMemo(
-    () => matchJobsForProfile(skills, jobs, seniority).slice(0, 3),
-    [skills, seniority],
-  );
+    try {
+      const cv =
+        `Name: ${fullName}\n` +
+        `Location: ${location || "Not specified"}\n` +
+        `Seniority: ${seniority}\n` +
+        `Experience: ${experience || "Not specified"}\n` +
+        `Education: ${education || "Not specified"}\n` +
+        `Projects: ${projects || "Not specified"}`;
 
-  const startGeneration = () => {
-    setLoading(true);
-    setCompleted(false);
-    setProgress(0);
+      const payload = {
+        type: "worker" as const,
+        name: fullName,
+        skills,
+        location: location || "Not specified",
+        experience_years: parseInt(age) || 0,
+        seniority: seniority.toLowerCase() as "junior" | "mid" | "senior",
+        cv,
+        email: contact.email,
+      };
 
-    const interval = window.setInterval(() => {
-      setProgress((current) => {
-        const next = current + 2;
-        if (next >= 100) {
-          window.clearInterval(interval);
-          setLoading(false);
-          setCompleted(true);
+      const result = await submitWorkerProfile(payload);
+      showToast("Profile analyzed successfully!", "success");
 
-          const profile: CandidateGeneratedProfile = {
-            id: "generated-profile",
-            name: fullName || "Generated Candidate",
-            age,
-            location,
-            workType,
-            seniority,
-            skills,
-            experienceText: experience,
-            education,
-            projects,
-            summary: profileSummary,
-            contact,
-          };
-          saveGeneratedProfile(profile);
-
-          return 100;
-        }
-        return next;
-      });
-    }, 100);
+      // Save to local storage for reference
+      const profile: CandidateGeneratedProfile = {
+        id: "generated-profile",
+        name: fullName,
+        age,
+        location: location || "Not specified",
+        workType,
+        seniority,
+        skills,
+        experienceText: experience,
+        education,
+        projects,
+        summary: result.summary || `${fullName}'s professional profile`,
+        contact,
+      };
+      saveGeneratedProfile(profile);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to submit profile";
+      showToast(errorMsg, "error");
+    }
   };
 
   return (
@@ -317,69 +342,68 @@ export const JobsPage = () => {
         <button
           type="button"
           disabled={loading}
-          onClick={startGeneration}
-          className="mt-6 inline-flex items-center rounded-xl bg-gradient-to-r from-[#005ac2] to-[#6801d1] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_26px_rgba(0,90,194,0.35)] disabled:opacity-70"
+          onClick={handleGenerateProfile}
+          className="mt-6 inline-flex items-center rounded-xl bg-gradient-to-r from-[#005ac2] to-[#6801d1] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_26px_rgba(0,90,194,0.35)] disabled:opacity-70 disabled:cursor-not-allowed transition"
         >
-          Generate AI Profile
+          {loading ? "Analyzing profile..." : "Generate AI Profile"}
         </button>
       </GlassCard>
 
-      {(loading || completed) && (
+      {/* Toast Notification */}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      )}
+
+      {/* Loading State */}
+      {loading && (
         <GlassCard>
-          <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
-            Analyzing...
-          </h2>
-          <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[#005ac2] to-[#6801d1] transition-all duration-100"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <p className="mt-2 text-sm text-[#44474e]">{progress}% complete</p>
+          <LoadingSpinner message="Analyzing profile..." size="md" />
         </GlassCard>
       )}
 
-      {completed && (
-        <>
-          <GlassCard>
-            <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
-              AI Generated Profile Summary
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#44474e]">
-              {profileSummary}
-            </p>
-            <p className="mt-3 text-xs text-[#44474e]/70">
-              Education: {education || "Not provided"} | Projects:{" "}
-              {projects || "Not provided"}
-            </p>
-            <p className="mt-2 text-xs text-[#005ac2]">
-              Contact visibility:{" "}
-              {contact.allowDirectContact ? "Visible to employers" : "Private"}
-            </p>
-          </GlassCard>
+      {/* Error State */}
+      {error && (
+        <GlassCard>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-semibold text-red-900">Error</p>
+            <p className="mt-1 text-sm text-red-700">{error}</p>
+          </div>
+        </GlassCard>
+      )}
 
+      {/* API Response Results */}
+      {apiResponse && apiResponse.success && (
+        <>
+          <WorkerResult result={apiResponse} />
+
+          {/* Matching Jobs from Mock Data */}
           <GlassCard>
             <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
-              Matching Jobs
+              Recommended Jobs
             </h2>
+            <p className="mt-1 text-sm text-[#44474e]">
+              Based on your profile and skills
+            </p>
             <div className="mt-4 grid gap-4 lg:grid-cols-3">
-              {matchedJobs.map((result) => (
-                <JobCard
-                  key={result.job.id}
-                  jobId={result.job.id}
-                  title={result.job.title}
-                  match={result.match}
-                  matchedSkills={
-                    result.matchedSkills.length > 0
-                      ? result.matchedSkills
-                      : result.job.skills.slice(0, 3)
-                  }
-                  description={`Skills match: ${result.matchedSkills.length > 0 ? result.matchedSkills.join(", ") : "Partial match based on profile context"}`}
-                  actionLabel="View Job"
-                  actionTo={`/jobs/${result.job.id}`}
-                  analyzing={loading}
-                />
-              ))}
+              {matchJobsForProfile(skills, jobs, seniority)
+                .slice(0, 3)
+                .map((result) => (
+                  <JobCard
+                    key={result.job.id}
+                    jobId={result.job.id}
+                    title={result.job.title}
+                    match={result.match}
+                    matchedSkills={
+                      result.matchedSkills.length > 0
+                        ? result.matchedSkills
+                        : result.job.skills.slice(0, 3)
+                    }
+                    description={`Skills match: ${result.matchedSkills.length > 0 ? result.matchedSkills.join(", ") : "Partial match based on profile context"}`}
+                    actionLabel="View Job"
+                    actionTo={`/jobs/${result.job.id}`}
+                    analyzing={false}
+                  />
+                ))}
             </div>
           </GlassCard>
         </>

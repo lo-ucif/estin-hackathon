@@ -1,14 +1,9 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { MatchBadge } from "../../components/MatchBadge";
-import { SkillChip } from "../../components/SkillChip";
-import { candidates } from "../../data/jobs";
+import { useState } from "react";
 import type { ExperienceLevel, WorkType } from "../../types";
-import { matchCandidatesForJob } from "../../utils/matcher";
-import {
-  getGeneratedProfile,
-  mapGeneratedProfileToCandidate,
-} from "../../utils/profileStore";
+import { useSubmitEmployerJob } from "../../hooks/useRecruitmentApi";
+import { EmployerResult } from "../../components/EmployerResult";
+import { Toast, useToast } from "../../components/Toast";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 
 const GlassCard = ({ children }: { children: React.ReactNode }) => (
   <section className="rounded-[30px] border border-[rgba(196,198,208,0.4)] bg-[rgba(255,255,255,0.72)] p-6 shadow-[0_14px_36px_rgba(0,0,0,0.06)] backdrop-blur-[10px] md:p-8">
@@ -17,19 +12,31 @@ const GlassCard = ({ children }: { children: React.ReactNode }) => (
 );
 
 export const UploadPage = () => {
-  const [jobTitle, setJobTitle] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
+  const [jobTitle, setJobTitle] = useState("Frontend Developer");
+  const [company, setCompany] = useState("Startup DZ");
+  const [jobDescription, setJobDescription] = useState(
+    "Looking for a frontend dev",
+  );
   const [experienceLevel, setExperienceLevel] =
     useState<ExperienceLevel>("Junior");
-  const [salaryRange, setSalaryRange] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState("Remote");
   const [workType, setWorkType] = useState<WorkType>("Remote");
-  const [skills, setSkills] = useState<string[]>(["React", "Node.js"]);
+  const [skills, setSkills] = useState<string[]>([
+    "React",
+    "JavaScript",
+    "CSS",
+  ]);
   const [skillInput, setSkillInput] = useState("");
   const [pdfName, setPdfName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [completed, setCompleted] = useState(false);
+
+  // API Integration
+  const {
+    submit: submitEmployerJob,
+    loading,
+    error,
+    data: apiResponse,
+  } = useSubmitEmployerJob();
+  const { toast, showToast, hideToast } = useToast();
 
   const addSkill = () => {
     const value = skillInput.trim();
@@ -42,44 +49,39 @@ export const UploadPage = () => {
     setSkills((current) => current.filter((item) => item !== skill));
   };
 
-  const startProcessing = () => {
-    setLoading(true);
-    setCompleted(false);
-    setProgress(0);
-    const interval = window.setInterval(() => {
-      setProgress((current) => {
-        const next = current + 2;
-        if (next >= 100) {
-          window.clearInterval(interval);
-          setLoading(false);
-          setCompleted(true);
-          return 100;
-        }
-        return next;
-      });
-    }, 100);
+  const handlePostJob = async () => {
+    // Validation
+    if (!jobTitle.trim()) {
+      showToast("Please enter a job title", "error");
+      return;
+    }
+    if (!company.trim()) {
+      showToast("Please enter your company name", "error");
+      return;
+    }
+    if (skills.length === 0) {
+      showToast("Please add at least one required skill", "error");
+      return;
+    }
+
+    try {
+      const payload = {
+        type: "employer" as const,
+        title: jobTitle,
+        company,
+        skills_required: skills,
+        location: location || "Not specified",
+        description: jobDescription || "Job role details",
+      };
+
+      await submitEmployerJob(payload);
+      showToast("Job posted successfully! Analyzing candidates...", "success");
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to post job";
+      showToast(errorMsg, "error");
+    }
   };
-
-  const summary = useMemo(() => {
-    const safeTitle = jobTitle || "Software Engineer";
-    const required = skills.slice(0, 5).join(", ") || "core engineering skills";
-    return `${safeTitle} role in ${location || "your target market"} (${workType}) for ${experienceLevel} level talent. Salary range: ${salaryRange || "competitive package"}. Required capabilities include ${required}.`;
-  }, [jobTitle, location, workType, experienceLevel, salaryRange, skills]);
-
-  const sourceCandidates = useMemo(() => {
-    const generated = getGeneratedProfile();
-    if (!generated) return candidates;
-    return [mapGeneratedProfileToCandidate(generated), ...candidates];
-  }, [completed]);
-
-  const matchedCandidates = useMemo(
-    () =>
-      matchCandidatesForJob(skills, sourceCandidates, experienceLevel).slice(
-        0,
-        4,
-      ),
-    [skills, sourceCandidates, experienceLevel],
-  );
 
   const inputClass =
     "rounded-xl border border-[var(--ai-border)] bg-white px-4 py-3 text-sm outline-none focus:border-[#005ac2]";
@@ -105,9 +107,9 @@ export const UploadPage = () => {
             className={inputClass}
           />
           <input
-            value={salaryRange}
-            onChange={(e) => setSalaryRange(e.target.value)}
-            placeholder="Salary Range"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            placeholder="Company Name"
             className={inputClass}
           />
           <input
@@ -210,86 +212,42 @@ export const UploadPage = () => {
 
         <button
           type="button"
-          onClick={startProcessing}
+          onClick={handlePostJob}
           disabled={loading}
-          className="mt-6 inline-flex items-center rounded-xl bg-gradient-to-r from-[#005ac2] to-[#6801d1] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_26px_rgba(0,90,194,0.35)] disabled:opacity-70"
+          className="mt-6 inline-flex items-center rounded-xl bg-gradient-to-r from-[#005ac2] to-[#6801d1] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_26px_rgba(0,90,194,0.35)] disabled:opacity-70 disabled:cursor-not-allowed transition"
         >
-          Generate Job Profile
+          {loading ? "Processing job..." : "Generate Job Profile"}
         </button>
       </GlassCard>
 
-      {(loading || completed) && (
+      {/* Toast Notification */}
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      )}
+
+      {/* Loading State */}
+      {loading && (
         <GlassCard>
-          <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
-            Processing Job...
-          </h2>
-          <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[#005ac2] to-[#6801d1] transition-all duration-100"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <p className="mt-2 text-sm text-[#44474e]">{progress}% complete</p>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#005ac2]">
-            AI ranking best-fit candidates...
-          </p>
+          <LoadingSpinner
+            message="Processing job and finding candidates..."
+            size="md"
+          />
         </GlassCard>
       )}
 
-      {completed && (
-        <>
-          <GlassCard>
-            <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
-              Generated Job Profile Summary
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#44474e]">{summary}</p>
-            <p className="mt-3 text-xs text-[#44474e]/70">
-              Description: {jobDescription || "No description provided"}
-            </p>
-          </GlassCard>
+      {/* Error State */}
+      {error && (
+        <GlassCard>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-semibold text-red-900">Error</p>
+            <p className="mt-1 text-sm text-red-700">{error}</p>
+          </div>
+        </GlassCard>
+      )}
 
-          <GlassCard>
-            <h2 className="ai-heading text-xl font-bold text-[#1a1c1e]">
-              Matching Candidates
-            </h2>
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              {matchedCandidates.map((result) => (
-                <article
-                  key={result.candidate.id}
-                  className="rounded-3xl border border-white/50 bg-white p-5 shadow-[0_10px_30px_rgba(30,41,59,0.08)]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <MatchBadge percent={result.match} analyzing={loading} />
-                      <h3 className="mt-2 text-lg font-bold text-[#1a1c1e]">
-                        {result.candidate.name}
-                      </h3>
-                      <p className="text-sm text-[#44474e]">
-                        {result.candidate.title}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {(result.matchedSkills.length > 0
-                      ? result.matchedSkills
-                      : result.candidate.skills.slice(0, 3)
-                    ).map((skill) => (
-                      <SkillChip key={skill} label={skill} />
-                    ))}
-                  </div>
-
-                  <Link
-                    to={`/candidates/${result.candidate.id}`}
-                    className="mt-5 block w-full rounded-xl bg-gradient-to-r from-[#005ac2] to-[#6801d1] px-4 py-2.5 text-center text-sm font-semibold text-white shadow-[0_10px_24px_rgba(0,90,194,0.35)]"
-                  >
-                    View Profile
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </GlassCard>
-        </>
+      {/* API Response Results */}
+      {apiResponse && apiResponse.success && (
+        <EmployerResult result={apiResponse} />
       )}
     </div>
   );
